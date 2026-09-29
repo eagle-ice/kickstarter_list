@@ -1,0 +1,43 @@
+# Kickstarter 数据管道配置
+
+# --- 抓取节流 ---
+# KS 的 ToS 禁止自动化抓取。这里刻意保守：单日一轮、页间随机 3~7 秒。
+# 不要为了跑快调低，被 Cloudflare 拉黑后整条管道就废了。
+request_delay: [3.0, 7.0]
+
+# 每个检索维度最多翻几页（每页 12 条）。
+# 全量在筹项目约 3200 个 → 想全覆盖 newest 维度需要约 270 页。
+# 首次建议 30 页试跑，稳定后再放大。
+max_pages_per_sort: 30
+
+# 实测：headless 一律被 Cloudflare 403，只有有头模式能过。
+# 保持 false。Linux 服务器上用 Xvfb 提供虚拟显示。
+headless: false
+
+nav_timeout_ms: 60000
+
+# --- 日更检索维度 ---
+# newest   = 当天新上线（选品的主入口）
+# end_date = 临近结束（冲刺期表现，看最终转化）
+# magic    = 平台推荐热度（编辑/算法在推什么）
+sorts:
+  - newest
+  - end_date
+  - magic
+
+# --- 竞品 / 品类监控 ---
+# Kickstarter 品类 id，会作为独立维度深挖。常用：
+#   16 = Technology   12 = Games      1 = Art        3 = Comics
+#   6  = Design(部分) 9 = Fashion     10 = Film&Video 14 = Music
+#   18 = Publishing
+watch_categories: []
+#  - 16
+#  - 12
+
+# 关键词监控：命中 name/blurb 的在筹项目会单独出现在日报第 ⑥ 节
+watch_keywords: []
+#  - 3d printer
+#  - laser engraver
+#  - e-ink
+
+webrobots_index: https://webrobots.io/kickstarter-datasets/
